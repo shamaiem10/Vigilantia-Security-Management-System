@@ -28,5 +28,5 @@ This project develops an integrated security management system featuring QR scan
 7. Use the menu driven graphical interface to interact with the Security Management System as a resident, security or management.
 
 **TEAM MEMBERS:**
-Shamaiem Shabbir
-Maryam Sheraz
+1. Shamaiem Shabbir
+2. Maryam Sheraz
