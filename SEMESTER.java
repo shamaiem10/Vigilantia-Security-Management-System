@@ -1,10 +1,11 @@
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import java.io.FileWriter;
 import java.util.Arrays;
@@ -20,8 +21,6 @@ import java.nio.file.Path;
 import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -598,7 +597,7 @@ public class SEMESTER{
                     String houseNumber = houseField.getText();
                     String contact = contactField.getText();
                     if (!visitorName.matches("[a-zA-Z ]+")) {
-                        JOptionPane.showMessageDialog(frame, "Name should contain alphabets and spaces only.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(frame, "Name should contain alphabets only.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
 
@@ -718,38 +717,44 @@ public class SEMESTER{
 
             // Add action listener to the button
             shareFeedbackButton.addActionListener(e -> {
-                        // Prompt user for resident's name
-                        String residentName = JOptionPane.showInputDialog(lilacFrame, "Enter Resident's Name:");
+                // Prompt user for resident's name
+                String residentName = JOptionPane.showInputDialog(lilacFrame, "Enter Resident's Name:");
 
-                        // Prompt user for feedback
-                        String feedback = JOptionPane.showInputDialog(lilacFrame, "Enter Feedback:");
+                // Check if the resident's name is not null or empty and contains only alphabets and spaces
+                if (residentName != null && !residentName.isEmpty() && residentName.matches("[a-zA-Z\\s]+")) {
+                    // Prompt user for feedback
+                    String feedback = JOptionPane.showInputDialog(lilacFrame, "Enter Feedback:");
 
-                        // Check if both name and feedback are not null or empty
-                        if (residentName != null && !residentName.isEmpty() && feedback != null && !feedback.isEmpty()) {
-                            // Concatenate resident's name and feedback into one string
-                            String feedbackEntry = "Resident: " + residentName + "\nFeedback: " + feedback;
+                    // Check if the feedback is not null or empty
+                    if (feedback != null && !feedback.isEmpty()) {
+                        // Concatenate resident's name and feedback into one string
+                        String feedbackEntry = "Resident: " + residentName + "\nFeedback: " + feedback;
 
-                            // Check if the feedback entry already exists in the list
-                            if (!residentFeedbacks.contains(feedbackEntry)) {
-                                // Add the feedback entry to the ArrayList residentFeedbacks
-                                residentFeedbacks.add(feedbackEntry);
-                                writeFeedbackToFile();
+                        // Check if the feedback entry already exists in the list
+                        if (!residentFeedbacks.contains(feedbackEntry)) {
+                            // Add the feedback entry to the ArrayList residentFeedbacks
+                            residentFeedbacks.add(feedbackEntry);
+                            writeFeedbackToFile();
 
-                                // Display confirmation message
-                                JOptionPane.showMessageDialog(lilacFrame, "Feedback saved successfully!");
-                            } else {
-                                // Display message indicating that the feedback is already present
-                                JOptionPane.showMessageDialog(lilacFrame, "Feedback already exists for this resident.");
-                            }
+                            // Display confirmation message
+                            JOptionPane.showMessageDialog(lilacFrame, "Feedback saved successfully!");
                         } else {
-                            // Display error message if either name or feedback is empty
-                            JOptionPane.showMessageDialog(lilacFrame, "Please enter both Resident's Name and Feedback.");
+                            // Display message indicating that the feedback is already present
+                            JOptionPane.showMessageDialog(lilacFrame, "Feedback already exists for this resident.");
                         }
+                    } else {
+                        // Display error message if feedback is empty
+                        JOptionPane.showMessageDialog(lilacFrame, "Please enter Feedback.");
+                    }
+                } else {
+                    // Display error message if resident name is invalid
+                    JOptionPane.showMessageDialog(lilacFrame, "Please enter a valid Resident's Name.");
+                }
 
+                // Set the frame visible
+                lilacFrame.setVisible(true);
+            });
 
-                        // Set the frame visible
-                        lilacFrame.setVisible(true);
-                    });
             alertNotificationsButton.addActionListener(e -> {
                 // Read feedbacks from the file into residentFeedbacks
                 readAlertsFromFile();
@@ -924,7 +929,28 @@ public class SEMESTER{
             JLabel houseNumberLabel1 = new JLabel("HOUSE NUMBER:");
             JTextField houseNumberField1 = new JTextField(20);
             houseNumberField1.setBackground(beigeColor);
+            nameField1.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+                    if (!Character.isLetter(c) && c != ' ' && c != KeyEvent.VK_BACK_SPACE) {
+                        e.consume();  // Ignore the event
+                        JOptionPane.showMessageDialog(frame, "Invalid input! Only alphabets and spaces are allowed.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
 
+            // Add key listener to contactField1 for numbers only
+            contactField1.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    char c = e.getKeyChar();
+                    if (!Character.isDigit(c) && c != KeyEvent.VK_BACK_SPACE) {
+                        e.consume();  // Ignore the event
+                        JOptionPane.showMessageDialog(frame, "Invalid input! Only numbers are allowed.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
             // Add components to the visitor panel using GridBagConstraints to center them
             GridBagConstraints gbc1 = new GridBagConstraints();
             gbc1.gridx = 0;
@@ -1028,6 +1054,19 @@ public class SEMESTER{
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             scrollPane.setPreferredSize(new Dimension(400, 300));
+            UIManager.put("OptionPane.okButtonText", "OK");
+            UIManager.put("OptionPane.buttonFont", customFont);
+            UIManager.put("OptionPane.buttonBackground", new Color(211, 103, 196, 199));
+            UIManager.put("OptionPane.buttonForeground", Color.WHITE);
+            UIManager.put("Button.background", new Color(211, 103, 196, 199));
+            UIManager.put("Button.foreground", Color.WHITE);
+
+            UIManager.put("ScrollBar.thumb", UIManager.get("ScrollBar.thumb"));
+            UIManager.put("ScrollBar.thumbHighlight", UIManager.get("ScrollBar.thumbHighlight"));
+            UIManager.put("ScrollBar.thumbDarkShadow", UIManager.get("ScrollBar.thumbDarkShadow"));
+            UIManager.put("ScrollBar.thumbShadow", UIManager.get("ScrollBar.thumbShadow"));
+            UIManager.put("ScrollBar.track", UIManager.get("ScrollBar.track"));
+            UIManager.put("ScrollBar.trackHighlight", UIManager.get("ScrollBar.trackHighlight"));
 
             // Display the panel in a JOptionPane with a custom message type
             JOptionPane.showMessageDialog(null, scrollPane, "Visitors Information", JOptionPane.PLAIN_MESSAGE);
@@ -1063,6 +1102,12 @@ public class SEMESTER{
             JScrollPane scrollPane = new JScrollPane(textArea);
             scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
             scrollPane.setPreferredSize(new Dimension(400, 300));
+            UIManager.put("OptionPane.okButtonText", "OK");
+            UIManager.put("OptionPane.buttonFont", customFont);
+            UIManager.put("OptionPane.buttonBackground", new Color(211, 103, 196, 199));
+            UIManager.put("OptionPane.buttonForeground", Color.WHITE);
+            UIManager.put("Button.background", new Color(211, 103, 196, 199));
+            UIManager.put("Button.foreground", Color.WHITE);
 
             // Display the panel in a JOptionPane with a custom message type
             JOptionPane.showMessageDialog(null, scrollPane, "Residents Information", JOptionPane.PLAIN_MESSAGE);
@@ -1186,11 +1231,15 @@ public class SEMESTER{
 
             // Check if the alert message is not null or empty
             if (alertMessage != null && !alertMessage.isEmpty()) {
-                // Remove newline characters from the alert message
-                // alertMessage = alertMessage.replaceAll("\\n", "");
+                // Capture the current time
+                LocalDateTime currentTime = LocalDateTime.now();
 
-                // Construct the alert entry
-                String alertEntry = "Alert:\n" + alertMessage;
+                // Format the current time
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                String formattedTime = currentTime.format(formatter);
+
+                // Construct the alert entry including the current time
+                String alertEntry = "Alert at " + formattedTime + ":\n" + alertMessage;
 
                 // Check if the alert entry already exists in the list
                 if (!alerts.contains(alertEntry)) {
@@ -1200,7 +1249,7 @@ public class SEMESTER{
 
                     // Display confirmation message
                     JOptionPane.showMessageDialog(lilacFrame, "Alert notification sent!");
-                } 
+                }
             } else {
                 // Display error message if the alert message is empty
                 JOptionPane.showMessageDialog(lilacFrame, "Please enter an alert message.");
